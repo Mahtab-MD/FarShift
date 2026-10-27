@@ -1,0 +1,6 @@
+{
+  "name": "FairShift - UN SDG 8 Decent Work Platform",
+  "description": "Decent work platform for employee-intensive organisations: transparent pay, GPS shift check-in, anonymous feedback, hazard reporting, and employer fatigue insights.",
+  "requestFramePermissions": ["geolocation", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
