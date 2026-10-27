@@ -74,6 +74,9 @@ export const EN_TRANSLATIONS: Translations = {
   feedbackSubmittedNotice: 'Thank you! Your anonymous feedback has been recorded without any personal identifier.',
   readAloud: 'Listen',
   listenToSummary: 'Read page summary aloud',
+  openMenu: 'Open navigation menu',
+  closeMenu: 'Close navigation menu',
+  mobileMenuTitle: 'FairShift Navigation & Settings',
 };
 
 export const EN_COMPLIANCE: ComplianceLocaleContent = {

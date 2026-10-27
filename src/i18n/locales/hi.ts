@@ -74,6 +74,9 @@ export const HI_TRANSLATIONS: Translations = {
   feedbackSubmittedNotice: 'धन्यवाद! आपका गोपनीय सुझाव बिना किसी पहचान के दर्ज कर लिया गया है।',
   readAloud: 'सुनें',
   listenToSummary: 'सारांश ज़ोर से सुनें',
+  openMenu: 'नेविगेशन मेनू खोलें',
+  closeMenu: 'नेविगेशन मेनू बंद करें',
+  mobileMenuTitle: 'फ़ेयरशिफ़्ट नेविगेशन और सेटिंग्स',
 };
 
 export const HI_COMPLIANCE: ComplianceLocaleContent = {

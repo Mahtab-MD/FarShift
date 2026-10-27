@@ -1,20 +1,13 @@
-import React from 'react';
-import {
-  Building2,
-  GraduationCap,
-  Globe,
-  ShieldCheck,
-  UserCheck,
-  Info,
-  ArrowLeftRight,
-  Sun,
-  Moon,
-} from 'lucide-react';
-import { Language, Sector, UserRole, Worker } from '../types/index.ts';
+import React, { useState, useRef, useEffect } from 'react';
+import { Building2, GraduationCap, Menu, ShieldCheck } from 'lucide-react';
+import { Sector, UserRole, Worker } from '../types/index.ts';
 import { useI18n } from '../i18n/I18nContext.tsx';
 import { isSampleMode } from '../data/index.ts';
+import { useScrollCollapsed } from '../hooks/useScrollCollapsed.ts';
+import { HeaderControls } from './HeaderControls.tsx';
+import { MobileMenu } from './MobileMenu.tsx';
 
-interface HeaderProps {
+export interface HeaderProps {
   role: UserRole | null;
   onChangeRole: (role: UserRole | null) => void;
   sector: Sector;
@@ -26,8 +19,12 @@ interface HeaderProps {
   showingAbout: boolean;
 }
 
+const MOBILE_MENU_ID = 'fairshift-mobile-menu';
+
 /**
- * Sticky global navigation header with sector switcher, worker profile selector, language toggle, and theme toggle.
+ * Sticky global navigation header.
+ * Keeps desktop/tablet (>= 768px) layout unchanged while automatically collapsing
+ * into a 56px compact bar with a hamburger menu on mobile (< 768px) when scrolled past 24px.
  *
  * @param {HeaderProps} props - Component props
  * @returns {React.ReactElement} Rendered Header element
@@ -43,153 +40,148 @@ export function Header({
   onOpenAbout,
   showingAbout,
 }: HeaderProps): React.ReactElement {
-  const { language, setLanguage, theme, toggleTheme, t, c } = useI18n();
+  const { t } = useI18n();
+  const isCollapsed = useScrollCollapsed();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const hamburgerRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (!isCollapsed && isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
+  }, [isCollapsed, isMobileMenuOpen]);
+
+  const BrandLogoButton = (
+    <button
+      type="button"
+      onClick={() => onChangeRole(null)}
+      aria-label="FairShift Home and Role Picker"
+      className="flex items-center gap-2 text-left group focus:outline-none focus:ring-2 focus:ring-teal-400 rounded-lg p-1"
+    >
+      <div className="w-9 h-9 rounded-xl bg-teal-500 text-slate-950 flex items-center justify-center font-black text-lg shadow-sm group-hover:bg-teal-400 transition-colors duration-150 motion-reduce:transition-none">
+        FS
+      </div>
+      <div>
+        <div className="flex items-center gap-1.5">
+          <span className="font-bold text-base tracking-tight text-white">{t.appName}</span>
+          <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-teal-950 text-teal-300 border border-teal-800">
+            SDG 8
+          </span>
+        </div>
+        <p className="text-[11px] text-slate-400 hidden sm:block leading-none">
+          {sector === 'construction' ? t.sectorConstruction : t.sectorCollege}
+        </p>
+      </div>
+    </button>
+  );
 
   return (
-    <header className="sticky top-0 z-30 bg-slate-900 text-white border-b border-slate-800 shadow-sm">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
+    <header className="sticky top-0 z-30 bg-slate-900 text-white border-b border-slate-800 shadow-sm transition-all duration-200 ease-out motion-reduce:transition-none">
+      {/* Desktop & Tablet Header (>= 768px): Unchanged */}
+      <div className="hidden md:block max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => onChangeRole(null)}
-              aria-label="FairShift Home and Role Picker"
-              className="flex items-center gap-2 text-left group focus:outline-none focus:ring-2 focus:ring-teal-400 rounded-lg p-1"
-            >
-              <div className="w-9 h-9 rounded-xl bg-teal-500 text-slate-950 flex items-center justify-center font-black text-lg shadow-sm group-hover:bg-teal-400 transition-colors">
-                FS
-              </div>
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-base tracking-tight text-white">{t.appName}</span>
-                  <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-teal-950 text-teal-300 border border-teal-800">
-                    SDG 8
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400 hidden sm:block leading-none">
-                  {sector === 'construction' ? t.sectorConstruction : t.sectorCollege}
-                </p>
-              </div>
-            </button>
-
+            {BrandLogoButton}
             {isSampleMode && (
               <span
                 title="Running on local sample data fallback (No Supabase credentials required)"
-                className="hidden md:inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30"
+                className="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30"
               >
                 <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" />
                 {t.sampleModeBadge}
               </span>
             )}
           </div>
-
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            <div role="group" aria-label={t.switchSector} className="inline-flex rounded-lg bg-slate-800 p-0.5 border border-slate-700">
-              <button
-                type="button"
-                onClick={() => onChangeSector('construction')}
-                aria-pressed={sector === 'construction'}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors min-h-[36px] ${
-                  sector === 'construction' ? 'bg-amber-500 text-slate-950 shadow-xs' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <Building2 className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>Construction</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onChangeSector('college')}
-                aria-pressed={sector === 'college'}
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors min-h-[36px] ${
-                  sector === 'college' ? 'bg-teal-400 text-slate-950 shadow-xs' : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <GraduationCap className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>College</span>
-              </button>
-            </div>
-
-            {role === 'worker' && workers.length > 0 && (
-              <div className="flex items-center">
-                <label htmlFor="worker-select" className="sr-only">Select Active Worker Profile</label>
-                <div className="relative flex items-center">
-                  <UserCheck className="w-3.5 h-3.5 text-teal-400 absolute left-2.5 pointer-events-none" aria-hidden="true" />
-                  <select
-                    id="worker-select"
-                    value={activeWorker?.id || ''}
-                    onChange={(e) => {
-                      const found = workers.find((w) => w.id === e.target.value);
-                      if (found) onSelectWorker(found);
-                    }}
-                    className="bg-slate-800 text-white text-xs font-medium pl-7 pr-6 py-1.5 min-h-[36px] rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400"
-                  >
-                    {workers.map((w) => (
-                      <option key={w.id} value={w.id}>{w.name} ({w.roleTitle})</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
-
-            <div className="flex items-center">
-              <label htmlFor="language-select" className="sr-only">Select Language</label>
-              <div className="relative flex items-center">
-                <Globe className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 pointer-events-none" aria-hidden="true" />
-                <select
-                  id="language-select"
-                  aria-label="Select Language"
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value as Language)}
-                  className="bg-slate-800 text-white text-xs font-semibold pl-7 pr-5 py-1.5 min-h-[36px] rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400"
-                >
-                  <option value="en">English (EN)</option>
-                  <option value="es">Español (ES)</option>
-                  <option value="hi">हिन्दी (HI)</option>
-                </select>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={toggleTheme}
-              aria-label={c.toggleThemeLabel}
-              title={theme === 'light' ? c.themeDark : c.themeLight}
-              className="inline-flex items-center gap-1 px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700 transition-colors cursor-pointer"
-            >
-              {theme === 'light' ? (
-                <Moon className="w-3.5 h-3.5 text-amber-300" aria-hidden="true" />
-              ) : (
-                <Sun className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
-              )}
-              <span className="hidden lg:inline">{theme === 'light' ? c.themeDark : c.themeLight}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={onOpenAbout}
-              aria-pressed={showingAbout}
-              className={`inline-flex items-center gap-1 px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold border transition-colors ${
-                showingAbout ? 'bg-teal-500 text-slate-950 border-teal-400' : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
-              }`}
-            >
-              <Info className="w-3.5 h-3.5" aria-hidden="true" />
-              <span className="hidden sm:inline">{t.navAbout}</span>
-            </button>
-
-            {role && (
-              <button
-                type="button"
-                onClick={() => onChangeRole(role === 'worker' ? 'admin' : 'worker')}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 transition-colors"
-                title={t.switchRole}
-              >
-                <ArrowLeftRight className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>{role === 'worker' ? t.roleAdmin : t.roleWorker}</span>
-              </button>
-            )}
-          </div>
+          <HeaderControls
+            role={role}
+            onChangeRole={onChangeRole}
+            sector={sector}
+            onChangeSector={onChangeSector}
+            workers={workers}
+            activeWorker={activeWorker}
+            onSelectWorker={onSelectWorker}
+            onOpenAbout={onOpenAbout}
+            showingAbout={showingAbout}
+            layout="inline"
+          />
         </div>
       </div>
+
+      {/* Mobile Header (< 768px): Full at top, compact 56px bar when scrolled */}
+      <div className="md:hidden max-w-7xl mx-auto px-3 transition-all duration-200 ease-out motion-reduce:transition-none">
+        {isCollapsed ? (
+          <div
+            data-testid="mobile-compact-bar"
+            className="h-14 flex items-center justify-between gap-2 transition-all duration-200 ease-out motion-reduce:transition-none"
+          >
+            <div className="flex items-center gap-2">
+              <button
+                ref={hamburgerRef}
+                type="button"
+                onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+                aria-label={t.openMenu}
+                aria-expanded={isMobileMenuOpen}
+                aria-controls={MOBILE_MENU_ID}
+                className="min-w-[44px] min-h-[44px] inline-flex items-center justify-center rounded-lg bg-slate-800 text-slate-100 hover:bg-slate-700 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400 transition-colors duration-150 motion-reduce:transition-none"
+              >
+                <Menu className="w-5 h-5" aria-hidden="true" />
+              </button>
+              {BrandLogoButton}
+            </div>
+
+            <span
+              data-testid="mobile-active-sector-pill"
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold border ${
+                sector === 'construction'
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                  : 'bg-teal-500/20 text-teal-300 border-teal-500/40'
+              }`}
+            >
+              {sector === 'construction' ? (
+                <Building2 className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              ) : (
+                <GraduationCap className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              )}
+              <span>{sector === 'construction' ? 'Construction' : 'College'}</span>
+            </span>
+          </div>
+        ) : (
+          <div
+            data-testid="mobile-expanded-bar"
+            className="py-2.5 flex flex-wrap items-center justify-between gap-2 transition-all duration-200 ease-out motion-reduce:transition-none"
+          >
+            <div className="flex items-center gap-2.5">{BrandLogoButton}</div>
+            <HeaderControls
+              role={role}
+              onChangeRole={onChangeRole}
+              sector={sector}
+              onChangeSector={onChangeSector}
+              workers={workers}
+              activeWorker={activeWorker}
+              onSelectWorker={onSelectWorker}
+              onOpenAbout={onOpenAbout}
+              showingAbout={showingAbout}
+              layout="inline"
+            />
+          </div>
+        )}
+      </div>
+
+      <MobileMenu
+        id={MOBILE_MENU_ID}
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        triggerRef={hamburgerRef}
+        role={role}
+        onChangeRole={onChangeRole}
+        sector={sector}
+        onChangeSector={onChangeSector}
+        workers={workers}
+        activeWorker={activeWorker}
+        onSelectWorker={onSelectWorker}
+        onOpenAbout={onOpenAbout}
+        showingAbout={showingAbout}
+      />
     </header>
   );
 }

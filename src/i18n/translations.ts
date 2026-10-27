@@ -84,9 +84,12 @@ export interface Translations {
   submitFeedback: string;
   feedbackSubmittedNotice: string;
 
-  // Accessibility / Audio
+  // Accessibility / Audio / Mobile Menu
   readAloud: string;
   listenToSummary: string;
+  openMenu: string;
+  closeMenu: string;
+  mobileMenuTitle: string;
 }
 
 export const TRANSLATIONS: Record<Language, Translations> = {

@@ -73,6 +73,9 @@ export const ES_TRANSLATIONS: Translations = {
   feedbackSubmittedNotice: '¡Gracias! Su comentario fue enviado de forma anónima.',
   readAloud: 'Leer en voz alta',
   listenToSummary: 'Resumen en audio para accesibilidad',
+  openMenu: 'Abrir menú de navegación',
+  closeMenu: 'Cerrar menú de navegación',
+  mobileMenuTitle: 'Navegación y Configuración de FairShift',
 };
 
 export const ES_COMPLIANCE: ComplianceLocaleContent = {
