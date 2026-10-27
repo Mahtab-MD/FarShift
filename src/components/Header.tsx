@@ -1,4 +1,14 @@
-import { Building2, GraduationCap, Globe, ShieldCheck, UserCheck, Info, ArrowLeftRight } from 'lucide-react';
+import {
+  Building2,
+  GraduationCap,
+  Globe,
+  ShieldCheck,
+  UserCheck,
+  Info,
+  ArrowLeftRight,
+  Sun,
+  Moon,
+} from 'lucide-react';
 import { Language, Sector, UserRole, Worker } from '../types/index.ts';
 import { useI18n } from '../i18n/I18nContext.tsx';
 import { isSampleMode } from '../data/index.ts';
@@ -26,7 +36,7 @@ export function Header({
   onOpenAbout,
   showingAbout,
 }: HeaderProps) {
-  const { language, setLanguage, t } = useI18n();
+  const { language, setLanguage, theme, toggleTheme, t, c } = useI18n();
 
   return (
     <header className="sticky top-0 z-30 bg-slate-900 text-white border-b border-slate-800 shadow-sm">
@@ -69,7 +79,7 @@ export function Header({
             )}
           </div>
 
-          {/* Controls: Sector Switcher, Worker Picker, Language, About, Role Switcher */}
+          {/* Controls: Sector Switcher, Worker Picker, Language, Theme, About, Role Switcher */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
             {/* Sector Switcher */}
             <div
@@ -158,6 +168,24 @@ export function Header({
                 </select>
               </div>
             </div>
+
+            {/* Theme Toggle */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={c.toggleThemeLabel}
+              title={theme === 'light' ? c.themeDark : c.themeLight}
+              className="inline-flex items-center gap-1 px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold bg-slate-800 text-slate-200 border border-slate-700 hover:bg-slate-700 transition-colors cursor-pointer"
+            >
+              {theme === 'light' ? (
+                <Moon className="w-3.5 h-3.5 text-amber-300" aria-hidden="true" />
+              ) : (
+                <Sun className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
+              )}
+              <span className="hidden lg:inline">
+                {theme === 'light' ? c.themeDark : c.themeLight}
+              </span>
+            </button>
 
             {/* About SDG 8 Button */}
             <button

@@ -235,3 +235,72 @@ export function validateAnonymousFeedbackInput(raw: unknown): ValidatedFeedbackI
     isValid: true,
   };
 }
+
+export interface ValidatedContactInquiry {
+  subject: string;
+  message: string;
+  replyEmail: string;
+  isValid: boolean;
+  error?: string;
+}
+
+/**
+ * Validates and sanitizes a trust/compliance or accessibility contact inquiry.
+ *
+ * @param {unknown} raw - Raw inquiry input object
+ * @returns {ValidatedContactInquiry} Validated and sanitized inquiry result
+ */
+export function validateContactInquiry(raw: unknown): ValidatedContactInquiry {
+  if (!raw || typeof raw !== 'object') {
+    return {
+      subject: '',
+      message: '',
+      replyEmail: '',
+      isValid: false,
+      error: 'Invalid inquiry payload',
+    };
+  }
+
+  const record = raw as Record<string, unknown>;
+  const subject = sanitizeText(record.subject, 120);
+  const message = sanitizeText(record.message, 1000);
+  const replyEmail = sanitizeText(record.replyEmail, 160);
+
+  if (subject.length < 3) {
+    return {
+      subject,
+      message,
+      replyEmail,
+      isValid: false,
+      error: 'Subject must be at least 3 characters',
+    };
+  }
+
+  if (message.length < 10) {
+    return {
+      subject,
+      message,
+      replyEmail,
+      isValid: false,
+      error: 'Message must be at least 10 characters',
+    };
+  }
+
+  if (replyEmail.length > 0 && (!replyEmail.includes('@') || !replyEmail.includes('.'))) {
+    return {
+      subject,
+      message,
+      replyEmail,
+      isValid: false,
+      error: 'Please enter a valid email address or leave optional email blank',
+    };
+  }
+
+  return {
+    subject,
+    message,
+    replyEmail,
+    isValid: true,
+  };
+}
+

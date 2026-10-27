@@ -124,3 +124,14 @@ export interface AttendanceTrendPoint {
   overtimeHours: number;
   activeWorkers: number;
 }
+
+export type CompliancePageId =
+  | 'about'
+  | 'privacy'
+  | 'terms'
+  | 'cookies'
+  | 'accessibility'
+  | 'contact';
+
+export type ThemeMode = 'light' | 'dark';
+

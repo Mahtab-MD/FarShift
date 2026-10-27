@@ -1,11 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Language } from '../types/index.ts';
+import { Language, ThemeMode } from '../types/index.ts';
 import { TRANSLATIONS, Translations } from './translations.ts';
+import {
+  COMPLIANCE_TRANSLATIONS,
+  ComplianceLocaleContent,
+} from './complianceTranslations.ts';
 
 interface I18nContextValue {
   language: Language;
   setLanguage: (lang: Language) => void;
+  theme: ThemeMode;
+  toggleTheme: () => void;
   t: Translations;
+  c: ComplianceLocaleContent;
   speakText: (text: string) => void;
   isSpeaking: boolean;
   stopSpeaking: () => void;
@@ -22,6 +29,14 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     return 'en';
   });
 
+  const [theme, setThemeState] = useState<ThemeMode>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('fairshift_theme') as ThemeMode;
+      if (saved === 'light' || saved === 'dark') return saved;
+    }
+    return 'light';
+  });
+
   const [isSpeaking, setIsSpeaking] = useState(false);
 
   const setLanguage = (lang: Language) => {
@@ -30,6 +45,27 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('fairshift_lang', lang);
     }
   };
+
+  const toggleTheme = () => {
+    setThemeState((prev) => {
+      const next: ThemeMode = prev === 'light' ? 'dark' : 'light';
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('fairshift_theme', next);
+      }
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [theme]);
 
   const stopSpeaking = () => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -70,7 +106,10 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const value: I18nContextValue = {
     language,
     setLanguage,
+    theme,
+    toggleTheme,
     t: TRANSLATIONS[language],
+    c: COMPLIANCE_TRANSLATIONS[language],
     speakText,
     isSpeaking,
     stopSpeaking,

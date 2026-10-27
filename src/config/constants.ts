@@ -111,3 +111,29 @@ export const SAMPLE_WORKERS: Worker[] = [
 export const CURRENCY_SYMBOL = '$';
 export const LOW_ACCURACY_THRESHOLD_METERS = 100;
 export const MAX_REASONABLE_HOURS = 24;
+
+/**
+ * Compliance, attribution, and clearly marked placeholder constants.
+ * Never invent company details, addresses, phone numbers, or legal claims.
+ */
+export const COMPLIANCE_CONFIG = {
+  attributionLine: 'FairShift, built for UN SDG 8, Prompt Wars 2026 x SRM ACM Student Chapter.',
+  copyrightYear: 2026,
+  authorName: 'Mahtab Mohammad',
+  lastUpdatedDate: 'October 26, 2026',
+  demoDisclaimer: 'Demonstration project. Not a production service.',
+  contactEmailPlaceholder: '[CONTACT EMAIL]',
+  organizationPlaceholder: '[ORGANIZATION NAME]',
+  addressPlaceholder: '[MAILING ADDRESS]',
+  jurisdictionPlaceholder: '[GOVERNING JURISDICTION]',
+  storageKeysUsed: [
+    'fairshift_workers_v1',
+    'fairshift_shifts_v1',
+    'fairshift_hazards_v1',
+    'fairshift_feedback_v1',
+    'fairshift_settings_v1',
+    'fairshift_lang',
+    'fairshift_theme',
+  ],
+} as const;
+

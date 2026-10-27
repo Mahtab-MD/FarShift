@@ -1,1 +1,28 @@
 @import "tailwindcss";
+
+html.dark body,
+html.dark .bg-slate-50 {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+html.dark .bg-white {
+  background-color: #1e293b;
+  color: #f8fafc;
+  border-color: #334155;
+}
+
+html.dark .text-slate-900,
+html.dark .text-slate-800 {
+  color: #f1f5f9;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-600 {
+  color: #cbd5e1;
+}
+
+html.dark .border-slate-200,
+html.dark .border-slate-300 {
+  border-color: #334155;
+}
