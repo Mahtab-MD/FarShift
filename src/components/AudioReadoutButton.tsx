@@ -1,3 +1,4 @@
+import React from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import { useI18n } from '../i18n/I18nContext.tsx';
 
@@ -6,10 +7,19 @@ interface AudioReadoutButtonProps {
   label?: string;
 }
 
-export function AudioReadoutButton({ textToRead, label }: AudioReadoutButtonProps) {
+/**
+ * Accessible text-to-speech button using browser SpeechSynthesis for workers with limited literacy.
+ *
+ * @param {AudioReadoutButtonProps} props - Component props
+ * @returns {React.ReactElement} Rendered audio readout button
+ */
+export function AudioReadoutButton({
+  textToRead,
+  label,
+}: AudioReadoutButtonProps): React.ReactElement {
   const { t, speakText, isSpeaking, stopSpeaking } = useI18n();
 
-  const handleToggle = () => {
+  const handleToggle = (): void => {
     if (isSpeaking) {
       stopSpeaking();
     } else {

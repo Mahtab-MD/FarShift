@@ -1,3 +1,4 @@
+import React from 'react';
 import { AttendanceTrendPoint } from '../types/index.ts';
 
 interface InlineSvgChartProps {
@@ -5,7 +6,16 @@ interface InlineSvgChartProps {
   title?: string;
 }
 
-export function InlineSvgChart({ data, title = 'Last 7 Days Attendance & Overtime Trend' }: InlineSvgChartProps) {
+/**
+ * Lightweight zero-dependency inline SVG stacked bar chart for 7-day attendance and overtime trends.
+ *
+ * @param {InlineSvgChartProps} props - Chart props
+ * @returns {React.ReactElement} Rendered SVG chart element
+ */
+export function InlineSvgChart({
+  data,
+  title = 'Last 7 Days Attendance & Overtime Trend',
+}: InlineSvgChartProps): React.ReactElement {
   if (!data || data.length === 0) {
     return (
       <div className="p-6 text-center text-sm text-slate-500 bg-slate-50 rounded-xl border border-slate-200">
@@ -55,7 +65,6 @@ export function InlineSvgChart({ data, title = 'Last 7 Days Attendance & Overtim
             Bar chart comparing daily regular hours and overtime hours across the last 7 days.
           </desc>
 
-          {/* Horizontal Grid Lines */}
           {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
             const y = paddingTop + plotHeight * (1 - ratio);
             const val = Math.round(maxHours * ratio);
@@ -82,7 +91,6 @@ export function InlineSvgChart({ data, title = 'Last 7 Days Attendance & Overtim
             );
           })}
 
-          {/* Bars per Day */}
           {data.map((point, idx) => {
             const regularHours = Math.max(0, point.totalHours - point.overtimeHours);
             const regHeight = (regularHours / maxHours) * plotHeight;
@@ -94,7 +102,6 @@ export function InlineSvgChart({ data, title = 'Last 7 Days Attendance & Overtim
 
             return (
               <g key={point.date}>
-                {/* Regular Hours Bar */}
                 {regHeight > 0 && (
                   <rect
                     x={x}
@@ -106,7 +113,6 @@ export function InlineSvgChart({ data, title = 'Last 7 Days Attendance & Overtim
                   />
                 )}
 
-                {/* Overtime Hours Stacked Top Bar */}
                 {otHeight > 0 && (
                   <rect
                     x={x}
@@ -118,7 +124,6 @@ export function InlineSvgChart({ data, title = 'Last 7 Days Attendance & Overtim
                   />
                 )}
 
-                {/* Value Label Above Bar */}
                 {point.totalHours > 0 && (
                   <text
                     x={x + barWidth / 2}
@@ -130,7 +135,6 @@ export function InlineSvgChart({ data, title = 'Last 7 Days Attendance & Overtim
                   </text>
                 )}
 
-                {/* Day Label */}
                 <text
                   x={x + barWidth / 2}
                   y={svgHeight - 12}

@@ -1,4 +1,4 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface Props {
@@ -10,12 +10,21 @@ interface State {
   errorMessage: string;
 }
 
+/**
+ * Top-level React error boundary providing a user-friendly recovery card on unexpected runtime errors.
+ */
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
     errorMessage: '',
   };
 
+  /**
+   * Updates boundary state when a descendant component throws an error.
+   *
+   * @param {Error} error - Thrown error instance
+   * @returns {State} Updated error state
+   */
   public static getDerivedStateFromError(error: Error): State {
     return {
       hasError: true,
@@ -23,16 +32,16 @@ export class ErrorBoundary extends Component<Props, State> {
     };
   }
 
-  public componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
-    // Error is captured in state for clean user recovery without console pollution
+  public componentDidCatch(_error: Error, _errorInfo: ErrorInfo): void {
+    // Error is captured in state for clean user recovery without console output
   }
 
-  private handleReset = () => {
+  private handleReset = (): void => {
     this.setState({ hasError: false, errorMessage: '' });
     window.location.reload();
   };
 
-  public render() {
+  public render(): ReactNode {
     if (this.state.hasError) {
       return (
         <div
@@ -43,12 +52,8 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="w-12 h-12 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mx-auto mb-4">
               <AlertTriangle className="w-6 h-6" aria-hidden="true" />
             </div>
-            <h1 className="text-xl font-bold text-slate-900 mb-2">
-              Something went wrong
-            </h1>
-            <p className="text-sm text-slate-600 mb-6">
-              {this.state.errorMessage}
-            </p>
+            <h1 className="text-xl font-bold text-slate-900 mb-2">Something went wrong</h1>
+            <p className="text-sm text-slate-600 mb-6">{this.state.errorMessage}</p>
             <button
               type="button"
               onClick={this.handleReset}

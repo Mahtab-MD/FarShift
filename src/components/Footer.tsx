@@ -1,3 +1,4 @@
+import React from 'react';
 import { Globe, Sun, Moon, ShieldCheck } from 'lucide-react';
 import { CompliancePageId, Language } from '../types/index.ts';
 import { COMPLIANCE_CONFIG } from '../config/constants.ts';
@@ -9,11 +10,17 @@ interface FooterProps {
   hasBottomNav?: boolean;
 }
 
+/**
+ * Global responsive footer providing links to trust & compliance pages, language selector, theme toggle, and attribution.
+ *
+ * @param {FooterProps} props - Component props
+ * @returns {React.ReactElement} Rendered Footer element
+ */
 export function Footer({
   activeCompliancePage,
   onSelectCompliancePage,
   hasBottomNav = false,
-}: FooterProps) {
+}: FooterProps): React.ReactElement {
   const { language, setLanguage, theme, toggleTheme, c } = useI18n();
 
   const links: { id: CompliancePageId; label: string }[] = [
@@ -33,7 +40,6 @@ export function Footer({
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        {/* Top Row: Trust & Compliance Navigation Links + Language & Theme Toggles */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-800">
           <nav
             aria-label="Trust and Compliance Pages"
@@ -59,7 +65,6 @@ export function Footer({
             })}
           </nav>
 
-          {/* Footer Language Toggle & Theme Toggle */}
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative flex items-center">
               <label htmlFor="footer-language-select" className="sr-only">
@@ -103,7 +108,6 @@ export function Footer({
           </div>
         </div>
 
-        {/* Bottom Row: Attribution & Copyright */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-400">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-teal-400 shrink-0" aria-hidden="true" />

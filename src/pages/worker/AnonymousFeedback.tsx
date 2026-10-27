@@ -10,39 +10,38 @@ interface AnonymousFeedbackProps {
   sector: Sector;
 }
 
-export function AnonymousFeedback({ sector }: AnonymousFeedbackProps) {
+/**
+ * Worker Anonymous Feedback & Manager Rating view with strict zero-identifier guarantee.
+ *
+ * @param {AnonymousFeedbackProps} props - Component props
+ * @returns {React.ReactElement} Rendered AnonymousFeedback view
+ */
+export function AnonymousFeedback({ sector }: AnonymousFeedbackProps): React.ReactElement {
   const { t } = useI18n();
   const [managerRating, setManagerRating] = useState<number>(4);
   const [conditionsRating, setConditionsRating] = useState<number>(4);
   const [comment, setComment] = useState<string>('');
-  const [submitting, setSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{
     type: 'success' | 'error';
     text: string;
   } | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setStatusMessage(null);
-
-    // Explicitly construct payload with ZERO worker identifier
-    const payload = {
+    const validated = validateAnonymousFeedbackInput({
       sector,
       managerRating,
       conditionsRating,
       comment,
-    };
-
-    const validated = validateAnonymousFeedbackInput(payload);
+    });
     if (!validated.isValid) {
-      setStatusMessage({
-        type: 'error',
-        text: validated.error || 'Invalid feedback rating.',
-      });
+      setStatusMessage({ type: 'error', text: validated.error || 'Invalid feedback rating.' });
       return;
     }
 
-    setSubmitting(true);
+    setIsSubmitting(true);
     try {
       await dataSource.submitFeedback({
         sector: validated.sector,
@@ -51,17 +50,11 @@ export function AnonymousFeedback({ sector }: AnonymousFeedbackProps) {
         comment: validated.comment,
       });
       setComment('');
-      setStatusMessage({
-        type: 'success',
-        text: t.feedbackSubmittedNotice,
-      });
+      setStatusMessage({ type: 'success', text: t.feedbackSubmittedNotice });
     } catch {
-      setStatusMessage({
-        type: 'error',
-        text: 'Could not submit feedback. Please try again.',
-      });
+      setStatusMessage({ type: 'error', text: 'Could not submit feedback. Please try again.' });
     } finally {
-      setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -70,21 +63,15 @@ export function AnonymousFeedback({ sector }: AnonymousFeedbackProps) {
     currentValue: number,
     onSelect: (val: number) => void,
     groupId: string
-  ) => (
+  ): React.ReactElement => (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <span id={groupId} className="text-xs font-bold text-slate-800">
-          {label}
-        </span>
+        <span id={groupId} className="text-xs font-bold text-slate-800">{label}</span>
         <span className="text-xs font-mono font-bold text-teal-700">{currentValue} / 5</span>
       </div>
-      <div
-        role="group"
-        aria-labelledby={groupId}
-        className="grid grid-cols-5 gap-2"
-      >
+      <div role="group" aria-labelledby={groupId} className="grid grid-cols-5 gap-2">
         {[1, 2, 3, 4, 5].map((score) => {
-          const active = score <= currentValue;
+          const isActive = score <= currentValue;
           return (
             <button
               key={score}
@@ -95,7 +82,7 @@ export function AnonymousFeedback({ sector }: AnonymousFeedbackProps) {
               className={`min-h-[48px] rounded-xl border flex flex-col items-center justify-center gap-0.5 font-bold text-xs transition-all cursor-pointer ${
                 score === currentValue
                   ? 'bg-teal-700 text-white border-teal-800 ring-2 ring-teal-500/40'
-                  : active
+                  : isActive
                   ? 'bg-teal-50 text-teal-900 border-teal-300'
                   : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
               }`}
@@ -104,7 +91,7 @@ export function AnonymousFeedback({ sector }: AnonymousFeedbackProps) {
                 className={`w-4 h-4 ${
                   score === currentValue
                     ? 'fill-amber-300 text-amber-300'
-                    : active
+                    : isActive
                     ? 'fill-teal-600 text-teal-600'
                     : 'text-slate-400'
                 }`}
@@ -120,7 +107,6 @@ export function AnonymousFeedback({ sector }: AnonymousFeedbackProps) {
 
   return (
     <div className="space-y-5">
-      {/* Header Banner */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
         <div className="flex items-start justify-between gap-2 mb-2">
           <div>
@@ -134,7 +120,6 @@ export function AnonymousFeedback({ sector }: AnonymousFeedbackProps) {
           />
         </div>
 
-        {/* Strict Zero-ID Security Guarantee Notice */}
         <div className="mt-3 p-3.5 rounded-xl bg-teal-950 text-teal-100 border border-teal-800 flex items-start gap-2.5 text-xs">
           <ShieldCheck className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" aria-hidden="true" />
           <div>
@@ -161,30 +146,15 @@ export function AnonymousFeedback({ sector }: AnonymousFeedbackProps) {
         </div>
       )}
 
-      {/* Feedback Form */}
       <form
         onSubmit={handleSubmit}
         className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-5"
       >
-        {renderRatingSelector(
-          t.rateManager,
-          managerRating,
-          setManagerRating,
-          'rate-manager-group'
-        )}
-
-        {renderRatingSelector(
-          t.rateConditions,
-          conditionsRating,
-          setConditionsRating,
-          'rate-conditions-group'
-        )}
+        {renderRatingSelector(t.rateManager, managerRating, setManagerRating, 'rate-manager-group')}
+        {renderRatingSelector(t.rateConditions, conditionsRating, setConditionsRating, 'rate-conditions-group')}
 
         <div>
-          <label
-            htmlFor="anonymous-comment"
-            className="block text-xs font-bold text-slate-800 mb-1.5"
-          >
+          <label htmlFor="anonymous-comment" className="block text-xs font-bold text-slate-800 mb-1.5">
             {t.optionalComment}
           </label>
           <textarea
@@ -199,11 +169,11 @@ export function AnonymousFeedback({ sector }: AnonymousFeedbackProps) {
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={isSubmitting}
           className="w-full min-h-[52px] inline-flex items-center justify-center gap-2 bg-teal-700 hover:bg-teal-800 text-white font-bold text-base rounded-xl px-5 py-3 shadow-sm transition-colors cursor-pointer"
         >
           <MessageSquareLock className="w-5 h-5" aria-hidden="true" />
-          <span>{submitting ? 'Sending...' : t.submitFeedback}</span>
+          <span>{isSubmitting ? 'Sending...' : t.submitFeedback}</span>
           <Send className="w-4 h-4 ml-1" aria-hidden="true" />
         </button>
       </form>

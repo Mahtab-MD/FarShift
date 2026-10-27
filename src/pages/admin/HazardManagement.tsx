@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ShieldAlert, CheckCircle2, Clock, AlertCircle, Mic } from 'lucide-react';
 import { HazardReport, HazardStatus } from '../../types/index.ts';
 import { dataSource } from '../../data/index.ts';
@@ -8,25 +8,31 @@ interface HazardManagementProps {
   onHazardUpdated: () => void;
 }
 
-export default function HazardManagement({ hazards, onHazardUpdated }: HazardManagementProps) {
+/**
+ * Employer safety & hazard escalation queue allowing supervisors to triage and resolve worker reports.
+ *
+ * @param {HazardManagementProps} props - Component props
+ * @returns {React.ReactElement} Rendered HazardManagement view
+ */
+export default function HazardManagement({
+  hazards,
+  onHazardUpdated,
+}: HazardManagementProps): React.ReactElement {
   const [notesMap, setNotesMap] = useState<Record<string, string>>({});
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<'all' | HazardStatus>('all');
 
-  const handleStatusChange = async (reportId: string, nextStatus: HazardStatus) => {
+  const handleStatusChange = async (reportId: string, nextStatus: HazardStatus): Promise<void> => {
     setUpdatingId(reportId);
     try {
-      const notes = notesMap[reportId];
-      await dataSource.updateHazardReportStatus(reportId, nextStatus, notes);
+      await dataSource.updateHazardReportStatus(reportId, nextStatus, notesMap[reportId]);
       onHazardUpdated();
     } finally {
       setUpdatingId(null);
     }
   };
 
-  const filtered = hazards.filter((h) =>
-    filterStatus === 'all' ? true : h.status === filterStatus
-  );
+  const filtered = hazards.filter((h) => (filterStatus === 'all' ? true : h.status === filterStatus));
 
   return (
     <div className="space-y-5">
@@ -37,8 +43,7 @@ export default function HazardManagement({ hazards, onHazardUpdated }: HazardMan
             Safety & Hazard Escalation Queue
           </h2>
           <p className="text-xs text-slate-600 mt-0.5">
-            Update status and add corrective action notes. Changes reflect immediately in the
-            Worker app.
+            Update status and add corrective action notes. Changes reflect immediately in the Worker app.
           </p>
         </div>
 
@@ -49,9 +54,7 @@ export default function HazardManagement({ hazards, onHazardUpdated }: HazardMan
               type="button"
               onClick={() => setFilterStatus(st)}
               className={`px-3 py-1.5 rounded-md text-xs font-bold capitalize min-h-[34px] transition-colors cursor-pointer ${
-                filterStatus === st
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                filterStatus === st ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               {st.replace('_', ' ')}
@@ -67,10 +70,7 @@ export default function HazardManagement({ hazards, onHazardUpdated }: HazardMan
       ) : (
         <div className="space-y-4">
           {filtered.map((h) => (
-            <div
-              key={h.id}
-              className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4"
-            >
+            <div key={h.id} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -94,12 +94,10 @@ export default function HazardManagement({ hazards, onHazardUpdated }: HazardMan
                     )}
                   </div>
                   <p className="text-xs text-slate-500">
-                    Reported by: <strong>{h.reportedByName}</strong> ·{' '}
-                    {new Date(h.createdAt).toLocaleString()}
+                    Reported by: <strong>{h.reportedByName}</strong> · {new Date(h.createdAt).toLocaleString()}
                   </p>
                 </div>
 
-                {/* Current Status Badge */}
                 <div>
                   {h.status === 'resolved' ? (
                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900">
@@ -120,23 +118,16 @@ export default function HazardManagement({ hazards, onHazardUpdated }: HazardMan
                 </div>
               </div>
 
-              <p className="text-sm text-slate-800 bg-slate-50 p-3.5 rounded-xl border border-slate-200">
-                {h.description}
-              </p>
+              <p className="text-sm text-slate-800 bg-slate-50 p-3.5 rounded-xl border border-slate-200">{h.description}</p>
 
-              {/* Resolution Note Input + Status Actions */}
               <div className="pt-2 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                 <div className="flex-1">
-                  <label htmlFor={`note-${h.id}`} className="sr-only">
-                    Corrective Action Note
-                  </label>
+                  <label htmlFor={`note-${h.id}`} className="sr-only">Corrective Action Note</label>
                   <input
                     id={`note-${h.id}`}
                     type="text"
                     value={notesMap[h.id] ?? h.resolutionNotes ?? ''}
-                    onChange={(e) =>
-                      setNotesMap((prev) => ({ ...prev, [h.id]: e.target.value }))
-                    }
+                    onChange={(e) => setNotesMap((prev) => ({ ...prev, [h.id]: e.target.value }))}
                     placeholder="Add supervisor corrective action note..."
                     className="w-full min-h-[40px] px-3 py-1.5 text-xs rounded-xl border border-slate-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-600"
                   />
@@ -146,11 +137,9 @@ export default function HazardManagement({ hazards, onHazardUpdated }: HazardMan
                   <button
                     type="button"
                     disabled={updatingId === h.id || h.status === 'reported'}
-                    onClick={() => handleStatusChange(h.id, 'reported')}
+                    onClick={() => void handleStatusChange(h.id, 'reported')}
                     className={`min-h-[40px] px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
-                      h.status === 'reported'
-                        ? 'bg-rose-600 text-white border-rose-700'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                      h.status === 'reported' ? 'bg-rose-600 text-white border-rose-700' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
                     }`}
                   >
                     Reported
@@ -158,11 +147,9 @@ export default function HazardManagement({ hazards, onHazardUpdated }: HazardMan
                   <button
                     type="button"
                     disabled={updatingId === h.id || h.status === 'in_review'}
-                    onClick={() => handleStatusChange(h.id, 'in_review')}
+                    onClick={() => void handleStatusChange(h.id, 'in_review')}
                     className={`min-h-[40px] px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
-                      h.status === 'in_review'
-                        ? 'bg-amber-500 text-slate-950 border-amber-600'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                      h.status === 'in_review' ? 'bg-amber-500 text-slate-950 border-amber-600' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
                     }`}
                   >
                     Mark In Review
@@ -170,11 +157,9 @@ export default function HazardManagement({ hazards, onHazardUpdated }: HazardMan
                   <button
                     type="button"
                     disabled={updatingId === h.id || h.status === 'resolved'}
-                    onClick={() => handleStatusChange(h.id, 'resolved')}
+                    onClick={() => void handleStatusChange(h.id, 'resolved')}
                     className={`min-h-[40px] px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
-                      h.status === 'resolved'
-                        ? 'bg-emerald-600 text-white border-emerald-700'
-                        : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
+                      h.status === 'resolved' ? 'bg-emerald-600 text-white border-emerald-700' : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
                     }`}
                   >
                     Mark Resolved

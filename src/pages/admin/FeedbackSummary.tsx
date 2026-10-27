@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { MessageSquareLock, Star, ShieldCheck } from 'lucide-react';
 import { AnonymousFeedback } from '../../types/index.ts';
 
@@ -6,7 +6,15 @@ interface FeedbackSummaryProps {
   feedbackList: AnonymousFeedback[];
 }
 
-export default function FeedbackSummary({ feedbackList }: FeedbackSummaryProps) {
+/**
+ * Employer anonymous sentiment summary view showing average ratings and unredacted comments with zero author identity.
+ *
+ * @param {FeedbackSummaryProps} props - Component props
+ * @returns {React.ReactElement} Rendered FeedbackSummary component
+ */
+export default function FeedbackSummary({
+  feedbackList,
+}: FeedbackSummaryProps): React.ReactElement {
   const averages = useMemo(() => {
     if (feedbackList.length === 0) {
       return { avgManager: 0, avgConditions: 0, count: 0 };
@@ -26,7 +34,6 @@ export default function FeedbackSummary({ feedbackList }: FeedbackSummaryProps) 
 
   return (
     <div className="space-y-5">
-      {/* Summary Header + Averages */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">
@@ -95,7 +102,6 @@ export default function FeedbackSummary({ feedbackList }: FeedbackSummaryProps) 
         </div>
       </div>
 
-      {/* Comments Feed */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
         <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
           <MessageSquareLock className="w-4 h-4 text-teal-700" aria-hidden="true" />

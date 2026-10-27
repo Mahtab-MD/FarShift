@@ -1,6 +1,7 @@
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Activity, AlertTriangle, Clock, ShieldCheck, Sliders } from 'lucide-react';
 import { SectorSettings, Shift } from '../../types/index.ts';
+import { FATIGUE_LIMITS } from '../../config/constants.ts';
 import { evaluateWorkerFatigue } from '../../lib/fatigue.ts';
 
 interface FatigueAlertsProps {
@@ -9,11 +10,17 @@ interface FatigueAlertsProps {
   onUpdateSettings: (next: SectorSettings) => Promise<void>;
 }
 
+/**
+ * Employer workforce fatigue & overwork prevention view with live threshold controls.
+ *
+ * @param {FatigueAlertsProps} props - Component props
+ * @returns {React.ReactElement} Rendered FatigueAlerts component
+ */
 export default function FatigueAlerts({
   shifts,
   settings,
   onUpdateSettings,
-}: FatigueAlertsProps) {
+}: FatigueAlertsProps): React.ReactElement {
   const alerts = useMemo(
     () =>
       evaluateWorkerFatigue(
@@ -24,18 +31,24 @@ export default function FatigueAlerts({
     [shifts, settings.fatigueDailyHoursThreshold, settings.fatigueMinRestHoursThreshold]
   );
 
-  const handleDailyThresholdChange = (val: number) => {
-    if (val >= 4 && val <= 20) {
-      onUpdateSettings({
+  const handleDailyThresholdChange = (val: number): void => {
+    if (
+      val >= FATIGUE_LIMITS.MIN_DAILY_THRESHOLD_HOURS &&
+      val <= FATIGUE_LIMITS.MAX_DAILY_THRESHOLD_HOURS
+    ) {
+      void onUpdateSettings({
         ...settings,
         fatigueDailyHoursThreshold: val,
       });
     }
   };
 
-  const handleRestThresholdChange = (val: number) => {
-    if (val >= 4 && val <= 24) {
-      onUpdateSettings({
+  const handleRestThresholdChange = (val: number): void => {
+    if (
+      val >= FATIGUE_LIMITS.MIN_REST_THRESHOLD_HOURS &&
+      val <= FATIGUE_LIMITS.MAX_REST_THRESHOLD_HOURS
+    ) {
+      void onUpdateSettings({
         ...settings,
         fatigueMinRestHoursThreshold: val,
       });
@@ -44,7 +57,6 @@ export default function FatigueAlerts({
 
   return (
     <div className="space-y-5">
-      {/* Configurable Fatigue Rules Header */}
       <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
@@ -62,7 +74,6 @@ export default function FatigueAlerts({
           </span>
         </div>
 
-        {/* Live Threshold Controls */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-slate-100">
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
             <label
@@ -116,13 +127,10 @@ export default function FatigueAlerts({
         </div>
       </div>
 
-      {/* Alert List */}
       {alerts.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center space-y-2">
           <ShieldCheck className="w-8 h-8 text-emerald-600 mx-auto" aria-hidden="true" />
-          <p className="text-sm font-bold text-slate-800">
-            Zero Fatigue Violations Detected
-          </p>
+          <p className="text-sm font-bold text-slate-800">Zero Fatigue Violations Detected</p>
           <p className="text-xs text-slate-500">
             All workers are within the {settings.fatigueDailyHoursThreshold}h daily limit and{' '}
             {settings.fatigueMinRestHoursThreshold}h rest turnaround requirement.
@@ -160,9 +168,7 @@ export default function FatigueAlerts({
                 </span>
               </div>
 
-              <p className="text-xs text-slate-800 leading-relaxed font-medium">
-                {alert.details}
-              </p>
+              <p className="text-xs text-slate-800 leading-relaxed font-medium">{alert.details}</p>
 
               <div className="flex items-center justify-between text-[11px] text-slate-600 pt-1 border-t border-slate-200/70 font-mono">
                 <span>

@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   Building2,
   GraduationCap,
@@ -25,6 +26,12 @@ interface HeaderProps {
   showingAbout: boolean;
 }
 
+/**
+ * Sticky global navigation header with sector switcher, worker profile selector, language toggle, and theme toggle.
+ *
+ * @param {HeaderProps} props - Component props
+ * @returns {React.ReactElement} Rendered Header element
+ */
 export function Header({
   role,
   onChangeRole,
@@ -35,14 +42,13 @@ export function Header({
   onSelectWorker,
   onOpenAbout,
   showingAbout,
-}: HeaderProps) {
+}: HeaderProps): React.ReactElement {
   const { language, setLanguage, theme, toggleTheme, t, c } = useI18n();
 
   return (
     <header className="sticky top-0 z-30 bg-slate-900 text-white border-b border-slate-800 shadow-sm">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          {/* Brand + SDG 8 Identity */}
           <div className="flex items-center gap-2.5">
             <button
               type="button"
@@ -55,9 +61,7 @@ export function Header({
               </div>
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-base tracking-tight text-white">
-                    {t.appName}
-                  </span>
+                  <span className="font-bold text-base tracking-tight text-white">{t.appName}</span>
                   <span className="text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-teal-950 text-teal-300 border border-teal-800">
                     SDG 8
                   </span>
@@ -79,22 +83,14 @@ export function Header({
             )}
           </div>
 
-          {/* Controls: Sector Switcher, Worker Picker, Language, Theme, About, Role Switcher */}
           <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-            {/* Sector Switcher */}
-            <div
-              role="group"
-              aria-label={t.switchSector}
-              className="inline-flex rounded-lg bg-slate-800 p-0.5 border border-slate-700"
-            >
+            <div role="group" aria-label={t.switchSector} className="inline-flex rounded-lg bg-slate-800 p-0.5 border border-slate-700">
               <button
                 type="button"
                 onClick={() => onChangeSector('construction')}
                 aria-pressed={sector === 'construction'}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors min-h-[36px] ${
-                  sector === 'construction'
-                    ? 'bg-amber-500 text-slate-950 shadow-xs'
-                    : 'text-slate-300 hover:text-white'
+                  sector === 'construction' ? 'bg-amber-500 text-slate-950 shadow-xs' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 <Building2 className="w-3.5 h-3.5" aria-hidden="true" />
@@ -105,9 +101,7 @@ export function Header({
                 onClick={() => onChangeSector('college')}
                 aria-pressed={sector === 'college'}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors min-h-[36px] ${
-                  sector === 'college'
-                    ? 'bg-teal-400 text-slate-950 shadow-xs'
-                    : 'text-slate-300 hover:text-white'
+                  sector === 'college' ? 'bg-teal-400 text-slate-950 shadow-xs' : 'text-slate-300 hover:text-white'
                 }`}
               >
                 <GraduationCap className="w-3.5 h-3.5" aria-hidden="true" />
@@ -115,17 +109,11 @@ export function Header({
               </button>
             </div>
 
-            {/* Active Worker selector when in Worker mode */}
             {role === 'worker' && workers.length > 0 && (
               <div className="flex items-center">
-                <label htmlFor="worker-select" className="sr-only">
-                  Select Active Worker Profile
-                </label>
+                <label htmlFor="worker-select" className="sr-only">Select Active Worker Profile</label>
                 <div className="relative flex items-center">
-                  <UserCheck
-                    className="w-3.5 h-3.5 text-teal-400 absolute left-2.5 pointer-events-none"
-                    aria-hidden="true"
-                  />
+                  <UserCheck className="w-3.5 h-3.5 text-teal-400 absolute left-2.5 pointer-events-none" aria-hidden="true" />
                   <select
                     id="worker-select"
                     value={activeWorker?.id || ''}
@@ -136,25 +124,17 @@ export function Header({
                     className="bg-slate-800 text-white text-xs font-medium pl-7 pr-6 py-1.5 min-h-[36px] rounded-lg border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-400"
                   >
                     {workers.map((w) => (
-                      <option key={w.id} value={w.id}>
-                        {w.name} ({w.roleTitle})
-                      </option>
+                      <option key={w.id} value={w.id}>{w.name} ({w.roleTitle})</option>
                     ))}
                   </select>
                 </div>
               </div>
             )}
 
-            {/* Language Switcher */}
             <div className="flex items-center">
-              <label htmlFor="language-select" className="sr-only">
-                Select Language
-              </label>
+              <label htmlFor="language-select" className="sr-only">Select Language</label>
               <div className="relative flex items-center">
-                <Globe
-                  className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 pointer-events-none"
-                  aria-hidden="true"
-                />
+                <Globe className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 pointer-events-none" aria-hidden="true" />
                 <select
                   id="language-select"
                   aria-label="Select Language"
@@ -169,7 +149,6 @@ export function Header({
               </div>
             </div>
 
-            {/* Theme Toggle */}
             <button
               type="button"
               onClick={toggleTheme}
@@ -182,27 +161,21 @@ export function Header({
               ) : (
                 <Sun className="w-3.5 h-3.5 text-amber-400" aria-hidden="true" />
               )}
-              <span className="hidden lg:inline">
-                {theme === 'light' ? c.themeDark : c.themeLight}
-              </span>
+              <span className="hidden lg:inline">{theme === 'light' ? c.themeDark : c.themeLight}</span>
             </button>
 
-            {/* About SDG 8 Button */}
             <button
               type="button"
               onClick={onOpenAbout}
               aria-pressed={showingAbout}
               className={`inline-flex items-center gap-1 px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-semibold border transition-colors ${
-                showingAbout
-                  ? 'bg-teal-500 text-slate-950 border-teal-400'
-                  : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
+                showingAbout ? 'bg-teal-500 text-slate-950 border-teal-400' : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
               }`}
             >
               <Info className="w-3.5 h-3.5" aria-hidden="true" />
               <span className="hidden sm:inline">{t.navAbout}</span>
             </button>
 
-            {/* Role Quick Switcher */}
             {role && (
               <button
                 type="button"

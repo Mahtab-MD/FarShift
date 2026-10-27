@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Language, ThemeMode } from '../types/index.ts';
+import { STORAGE_KEYS, TIME_CONSTANTS } from '../config/constants.ts';
 import { TRANSLATIONS, Translations } from './translations.ts';
 import {
   COMPLIANCE_TRANSLATIONS,
@@ -20,10 +21,16 @@ interface I18nContextValue {
 
 const I18nContext = createContext<I18nContextValue | undefined>(undefined);
 
-export function I18nProvider({ children }: { children: React.ReactNode }) {
+/**
+ * Provides multi-language translations (EN, ES, HI), light/dark theme persistence, and text-to-speech synthesis.
+ *
+ * @param {{ children: React.ReactNode }} props - Provider children
+ * @returns {React.ReactElement} Context provider element
+ */
+export function I18nProvider({ children }: { children: React.ReactNode }): React.ReactElement {
   const [language, setLanguageState] = useState<Language>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('fairshift_lang') as Language;
+      const saved = localStorage.getItem(STORAGE_KEYS.LANG) as Language;
       if (saved && (saved === 'en' || saved === 'es' || saved === 'hi')) return saved;
     }
     return 'en';
@@ -31,7 +38,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   const [theme, setThemeState] = useState<ThemeMode>(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('fairshift_theme') as ThemeMode;
+      const saved = localStorage.getItem(STORAGE_KEYS.THEME) as ThemeMode;
       if (saved === 'light' || saved === 'dark') return saved;
     }
     return 'light';
@@ -39,18 +46,18 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 
   const [isSpeaking, setIsSpeaking] = useState(false);
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = (lang: Language): void => {
     setLanguageState(lang);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('fairshift_lang', lang);
+      localStorage.setItem(STORAGE_KEYS.LANG, lang);
     }
   };
 
-  const toggleTheme = () => {
+  const toggleTheme = (): void => {
     setThemeState((prev) => {
       const next: ThemeMode = prev === 'light' ? 'dark' : 'light';
       if (typeof window !== 'undefined') {
-        localStorage.setItem('fairshift_theme', next);
+        localStorage.setItem(STORAGE_KEYS.THEME, next);
       }
       return next;
     });
@@ -67,28 +74,22 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     }
   }, [theme]);
 
-  const stopSpeaking = () => {
+  const stopSpeaking = (): void => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       setIsSpeaking(false);
     }
   };
 
-  const speakText = (text: string) => {
+  const speakText = (text: string): void => {
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
       return;
     }
     window.speechSynthesis.cancel();
 
     const utterance = new SpeechSynthesisUtterance(text);
-    if (language === 'es') {
-      utterance.lang = 'es-ES';
-    } else if (language === 'hi') {
-      utterance.lang = 'hi-IN';
-    } else {
-      utterance.lang = 'en-US';
-    }
-    utterance.rate = 0.95;
+    utterance.lang = language === 'es' ? 'es-ES' : language === 'hi' ? 'hi-IN' : 'en-US';
+    utterance.rate = TIME_CONSTANTS.SPEECH_SYNTHESIS_RATE;
 
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
@@ -118,6 +119,11 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 
+/**
+ * Custom hook to access FairShift translations, theme controls, and speech synthesis.
+ *
+ * @returns {I18nContextValue} Active i18n and theme context value
+ */
 export function useI18n(): I18nContextValue {
   const ctx = useContext(I18nContext);
   if (!ctx) {

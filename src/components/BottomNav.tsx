@@ -1,3 +1,4 @@
+import React from 'react';
 import { MapPin, FileText, ShieldAlert, MessageSquareLock, Info } from 'lucide-react';
 import { useI18n } from '../i18n/I18nContext.tsx';
 
@@ -9,7 +10,17 @@ interface BottomNavProps {
   activeHazardCount?: number;
 }
 
-export function BottomNav({ activeTab, onSelectTab, activeHazardCount = 0 }: BottomNavProps) {
+/**
+ * Fixed mobile-first bottom navigation bar for the Worker interface.
+ *
+ * @param {BottomNavProps} props - Component props
+ * @returns {React.ReactElement} Rendered BottomNav element
+ */
+export function BottomNav({
+  activeTab,
+  onSelectTab,
+  activeHazardCount = 0,
+}: BottomNavProps): React.ReactElement {
   const { t } = useI18n();
 
   const items: { id: WorkerTab; label: string; icon: typeof MapPin; badge?: number }[] = [
